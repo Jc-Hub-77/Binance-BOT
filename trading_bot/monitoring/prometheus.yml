@@ -1,0 +1,59 @@
+# prometheus.yml
+
+global:
+  scrape_interval: 15s # How frequently to scrape targets by default.
+  evaluation_interval: 15s # How frequently to evaluate rules.
+  # scrape_timeout is set to the global default (10s).
+
+# Alertmanager configuration (optional, if you set up Alertmanager)
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets:
+#           # - alertmanager:9093
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+# rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: "prometheus"
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+    static_configs:
+      - targets: ["localhost:9090"] # Prometheus scraping itself
+
+  # Job for scraping the trading bot
+  - job_name: "trading-bot"
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+    static_configs:
+      # The 'trading-bot' service name comes from docker-compose.yml
+      # Docker's internal DNS will resolve 'trading-bot' to the container's IP.
+      # Port 8000 is the default port exposed by the bot for metrics.
+      - targets: ["trading-bot:8000"]
+    # Optional: relabel_configs to add/modify labels, or filter targets
+    # relabel_configs:
+    #   - source_labels: [__address__]
+    #     target_label: instance
+    #     regex: trading-bot:(.*) # Capture port if needed, or just use hostname
+    #     replacement: trading-bot
+
+# Example of scraping multiple instances if you had them:
+# scrape_configs:
+#   - job_name: 'trading-bots'
+#     static_configs:
+#       - targets: ['bot1.example.com:8000', 'bot2.example.com:8000']
+#     # Or use service discovery like Docker Swarm, Kubernetes, Consul, etc.
+#     # docker_sd_configs:
+#     #   - host: unix:///var/run/docker.sock
+#     #     port: 8000 # Default port, assuming all bot containers expose metrics on this port
+#     #     refresh_interval: 30s
+#     # relabel_configs: # Example to keep only containers with a specific label
+#     #   - source_labels: [__meta_docker_container_label_app]
+#     #     regex: trading-bot
+#     #     action: keep

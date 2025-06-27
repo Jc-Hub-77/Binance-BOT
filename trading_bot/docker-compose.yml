@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  trading-bot:
+    build:
+      context: . # Build from the Dockerfile in the current directory
+      # dockerfile: Dockerfile # Optional if your Dockerfile has a different name
+    container_name: trading-bot
+    restart: unless-stopped
+    env_file:
+      - .env # Load environment variables from .env file in the project root
+    volumes:
+      # Mount config directory as read-only
+      # Assumes config/config.yaml is used by the bot.
+      # If your config path is different inside the container, adjust accordingly.
+      - ./config:/app/config:ro
+      # Mount logs directory for persistence
+      - ./logs:/app/logs
+      # Optional: Mount a data directory if your bot uses local data files (e.g., for backtesting)
+      # - ./data:/app/data:ro
+    ports:
+      # Expose Prometheus metrics port (default 8000, or as configured in .env/config.yaml)
+      # Format: "HOST_PORT:CONTAINER_PORT"
+      - "8000:8000" # Change host port if 8000 is already in use on your host
+    networks:
+      - trading-network
+    # depends_on: # Add dependencies if your bot relies on other services like a database
+    #   - database # Example
+
+  prometheus:
+    image: prom/prometheus:latest # Using latest, consider pinning to a specific version
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      # Mount Prometheus configuration file (read-only)
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      # Optional: Mount Prometheus data directory for persistence
+      # - prometheus_data:/prometheus
+    ports:
+      - "9090:9090" # Prometheus UI/API port
+    networks:
+      - trading-network
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      # Optional: Add storage path if using persistent data volume
+      # - '--storage.tsdb.path=/prometheus'
+      # Optional: Set retention time
+      # - '--storage.tsdb.retention.time=90d'
+
+  # Optional: Grafana for visualizing metrics
+  grafana:
+    image: grafana/grafana:latest # Using latest, consider pinning
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000" # Grafana UI port
+    volumes:
+      # Optional: Mount Grafana data directory for persistence (dashboards, datasources)
+      # - grafana_data:/var/lib/grafana
+      # Optional: Mount provisioning directory for datasources and dashboards
+      - ./monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./monitoring/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+    environment:
+      # Default admin user (admin/admin). Change GF_SECURITY_ADMIN_PASSWORD for production.
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      # Skip login page for anonymous access if desired (for local dev)
+      # - GF_AUTH_ANONYMOUS_ENABLED=true
+      # - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+    networks:
+      - trading-network
+    depends_on:
+      - prometheus # Grafana needs Prometheus to be up
+
+networks:
+  trading-network:
+    driver: bridge # Default bridge network
+
+# Optional: Define named volumes for persistent data
+# volumes:
+#   prometheus_data:
+#   grafana_data:
