@@ -1,0 +1,21 @@
+# grafana/provisioning/dashboards/bot_dashboard_provider.yml
+apiVersion: 1
+
+providers:
+  - name: 'BotDashboards' # A uniquely identifiable name for the provider
+    orgId: 1 # Default organization ID
+    folder: 'Trading Bot' # Optional: name of the folder to GPLOAD dashboards to.
+    folderUid: '' # Optional: unique identifier for the folder.
+    type: file # Provider type: 'file' means it loads dashboards from files.
+    disableDeletion: false # When set to true, Grafana will disable deletion of dashboards from the UI.
+    editable: true # When set to true, dashboards can be edited in the UI.
+    options:
+      # Path to the directory where dashboard JSON files are located.
+      # This path is relative to Grafana's dashboards directory (e.g., /var/lib/grafana/dashboards or as configured).
+      # In our docker-compose, we mount ./monitoring/grafana/provisioning/dashboards to /etc/grafana/provisioning/dashboards.
+      # So, Grafana will look inside this mounted volume.
+      path: /etc/grafana/provisioning/dashboards
+      # For development, you might want Grafana to pick up changes automatically.
+      # This is usually enabled by default for file providers.
+      # allowUiUpdates: true # If true, dashboards updated in UI will also update the JSON file on disk (requires Grafana >=6.7 and specific permissions)
+      #                  # Generally safer to keep this false or unset for provisioned dashboards to maintain version control.

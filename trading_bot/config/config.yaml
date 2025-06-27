@@ -1,0 +1,77 @@
+mode: paper # live, paper, backtest
+
+logging:
+  level: INFO
+  file: logs/trading_bot.log
+  rotation: "1 day"
+  retention: "30 days"
+
+exchange:
+  class: modules.exchange.ccxt_connector.CCXTConnector # Corrected path based on typical structure
+  params:
+    exchange: binance # Example, user should configure
+    credentials:
+      apikey: ${BINANCE_API_KEY}
+      secret: ${BINANCE_SECRET}
+#  features: # As per order bot guide v2, these are optional features for specific connectors
+#    futures: false
+#    dex: false
+
+strategy:
+  class: modules.strategy.combined.CombinedStrategy # Defaulting to CombinedStrategy
+  params:
+    require_confirmation: true
+    # min_confidence: 0.5 # For DetectorDrivenStrategy
+    # internal_weight: 0.5 # For a more complex CombinedStrategy
+
+execution:
+  class: modules.execution.iceberg.IcebergExecution # Defaulting to IcebergExecution
+  params:
+    chunk_size: 0.1
+    interval_seconds: 5
+#  order_types: # As per order bot guide v2, for advanced execution strategies
+#    - market
+#    - limit
+#    - iceberg
+#    - bracket
+
+risk: # Optional section, can be omitted if not needed
+  enabled: true
+  checks:
+    - class: modules.risk.position_limits.PositionLimitCheck
+      enabled: true # Explicitly enable check
+      params:
+        max_position_size: 1000
+        max_positions: 10
+#    - class: modules.risk.drawdown.DrawdownProtection # Example from guide
+#      enabled: true
+#      params:
+#        max_drawdown_pct: 0.15
+#        window_hours: 24
+#    - class: modules.risk.correlation.CorrelationLimit # Example from guide
+#      enabled: true
+#      params:
+#        max_correlation: 0.8
+#        lookback_periods: 100
+
+monitoring: # Optional section
+  prometheus_port: 8000 # Default from order bot v4
+#  alerts: # Example from guide
+#    enabled: true
+#    class: modules.monitoring.alerter.Alerter
+#    params:
+#      slack_webhook: ${SLACK_WEBHOOK_URL}
+#      channels: [slack]
+#  analytics: # Example from guide
+#    enabled: true
+#    class: modules.monitoring.analytics.PerformanceAnalytics
+#    report_interval: 3600
+
+# tracking: # Example from guide - Optional
+#  enabled: true
+#  class: modules.tracking.order_tracker.OrderTracker
+#  params:
+#    persistence_enabled: true # Requires DB setup
+#  reporting:
+#    interval: 3600
+#    send_alerts: true

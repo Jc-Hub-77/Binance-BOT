@@ -1,0 +1,26 @@
+# grafana/provisioning/datasources/prometheus_ds.yml
+apiVersion: 1
+
+datasources:
+  - name: Prometheus_Bot # Name of the datasource in Grafana
+    type: prometheus
+    access: proxy # Access mode: 'direct' or 'proxy'. Proxy is usually recommended.
+    url: http://prometheus:9090 # URL of the Prometheus server, 'prometheus' is the service name from docker-compose
+    isDefault: true # Make this the default datasource
+    editable: true # Whether the datasource can be edited in Grafana UI
+    jsonData:
+      # Optional: Add specific Prometheus settings here if needed
+      #timeInterval: "15s" # Default scrape interval if not set by Prometheus
+      # queryTimeout: "60s"
+      # httpMethod: "POST"
+      # exemplarTraceIdDestinations:
+      #  - name: trace_id
+      #    datasourceUid: jaeger-uid # If you have Jaeger for tracing
+      pass # No specific jsonData needed for basic setup
+
+    # Optional: Secure jsonData fields (like API keys or passwords if Prometheus was secured)
+    # secureJsonData:
+    #   httpHeaderValue1: 'Bearer your_prometheus_token' # Example
+
+    # Optional: Version of the datasource (useful if you have multiple versions of a datasource type)
+    # version: 1
