@@ -33,7 +33,7 @@ class RiskCheckConfig(BaseSubConfig):
     enabled: bool = True # Individual checks can be disabled
 
 class RiskConfig(BaseModel):
-    enabled: bool = True
+    enabled: bool = False # Default to False as per plan
     checks: List[RiskCheckConfig] = Field(default_factory=list)
 
 class LoggingConfig(BaseModel):

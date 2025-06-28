@@ -18,7 +18,7 @@ exchange:
 #    dex: false
 
 strategy:
-  class: modules.strategy.combined.CombinedStrategy # Defaulting to CombinedStrategy
+  class: modules.strategy.combined.CombinedStrategy
   params:
     require_confirmation: true
     # min_confidence: 0.5 # For DetectorDrivenStrategy
